@@ -1,0 +1,21 @@
+{
+  "name": "quest-completer-web",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Web edition of Quest Completer. Zero dependencies, in-memory sessions, token never written to disk.",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "discord",
+    "quests",
+    "quest-completer",
+    "web"
+  ],
+  "license": "MIT"
+}
