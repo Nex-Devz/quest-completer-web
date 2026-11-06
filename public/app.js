@@ -154,7 +154,6 @@ function cacheDom() {
   els.logoutBtn = $('#logout-btn');
   els.logoutDialog = $('#logout-dialog');
 
-  els.sessionChipText = $('#session-chip-text');
   els.autoToggle = $('#auto-toggle');
   els.notifyToggle = $('#notify-toggle');
   els.soundToggle = $('#sound-toggle');
@@ -227,8 +226,8 @@ function cacheDom() {
   els.railBadgesList = $('#rail-badges-list');
   els.hypesquadSwitchBtn = $('#hypesquad-switch-btn');
   els.boosterStreakSelect = $('#booster-streak-select');
-  els.badgeEarlyToggle = $('#badge-early-toggle');
-  els.badgeBughunterToggle = $('#badge-bughunter-toggle');
+  els.badgeEarlyToggle = $('#early-supporter-toggle');
+  els.badgeBughunterToggle = $('#bug-hunter-toggle');
   els.badgeSaveBtn = $('#badge-save-btn');
   els.badgeCheckBtn = $('#badge-check-btn');
 
@@ -718,7 +717,8 @@ function switchModule(modName) {
   state.currentModule = modName;
 
   $$('.nav-item').forEach((item) => {
-    item.classList.toggle('is-active', item.dataset.module === modName);
+    const target = item.dataset.nav || item.dataset.module;
+    item.classList.toggle('is-active', target === modName);
   });
 
   const modules = ['dashboard', 'quests', 'accounts', 'badges', 'presence', 'utility'];
@@ -978,12 +978,14 @@ function toggleVrSpoofer(enable) {
 function updateSpooferUI() {
   if (els.spooferMobileToggle) {
     els.spooferMobileToggle.classList.toggle('is-on', state.mobileSpoofer);
+    els.spooferMobileToggle.setAttribute('aria-pressed', String(state.mobileSpoofer));
   }
   if (els.spooferMobileStatus) {
     els.spooferMobileStatus.textContent = state.mobileSpoofer ? 'ON' : 'OFF';
   }
   if (els.rpcSpooferMobile) {
     els.rpcSpooferMobile.classList.toggle('is-on', state.mobileSpoofer);
+    els.rpcSpooferMobile.setAttribute('aria-pressed', String(state.mobileSpoofer));
   }
   if (els.rpcSpooferMobileStatus) {
     els.rpcSpooferMobileStatus.textContent = state.mobileSpoofer ? 'ON' : 'OFF';
@@ -991,12 +993,14 @@ function updateSpooferUI() {
 
   if (els.spooferVrToggle) {
     els.spooferVrToggle.classList.toggle('is-on', state.vrSpoofer);
+    els.spooferVrToggle.setAttribute('aria-pressed', String(state.vrSpoofer));
   }
   if (els.spooferVrStatus) {
     els.spooferVrStatus.textContent = state.vrSpoofer ? 'ON' : 'OFF';
   }
   if (els.rpcSpooferVr) {
     els.rpcSpooferVr.classList.toggle('is-on', state.vrSpoofer);
+    els.rpcSpooferVr.setAttribute('aria-pressed', String(state.vrSpoofer));
   }
   if (els.rpcSpooferVrStatus) {
     els.rpcSpooferVrStatus.textContent = state.vrSpoofer ? 'ON' : 'OFF';
@@ -1504,6 +1508,7 @@ function updateCounts() {
 }
 
 function updatePageSub() {
+  if (!els.pageSub) return;
   if (state.loading) {
     els.pageSub.textContent = 'Fetching your account…';
     return;
@@ -2663,7 +2668,7 @@ function bindEvents() {
   // Navigation module switching
   $$('.nav-item').forEach((item) => {
     item.addEventListener('click', () => {
-      const mod = item.dataset.module;
+      const mod = item.dataset.nav || item.dataset.module;
       if (mod) switchModule(mod);
     });
   });
