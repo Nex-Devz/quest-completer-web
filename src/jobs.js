@@ -168,8 +168,12 @@ async function executeJob(session, job) {
     const fresh = await client.getQuests();
     const byId = new Map(fresh.map((quest) => [quest.id, quest]));
 
-    for (const target of job.targets) {
-      if (shouldCancel()) break;
+    const runTarget = async (target, index) => {
+      if (index > 0) {
+        // Micro-jitter to avoid flooding Discord endpoints at the exact same millisecond
+        await sleep(index * 250);
+      }
+      if (shouldCancel()) return;
 
       const raw = byId.get(target.id);
       if (!raw) {
@@ -179,7 +183,7 @@ async function executeJob(session, job) {
           message: 'No longer available on this account.',
         });
         log(job, 'warn', `${target.name}: no longer available.`);
-        continue;
+        return;
       }
 
       const quest = normalizeQuest(raw);
@@ -193,20 +197,20 @@ async function executeJob(session, job) {
       if (quest.status === 'claimed') {
         job.stats.skipped += 1;
         updateQuest(job, target.id, { state: 'skipped', percent: 100, message: 'Already completed and claimed.' });
-        continue;
+        return;
       }
 
       if (quest.status === 'claimable') {
         updateQuest(job, target.id, { state: 'done', percent: 100, message: 'Quest complete. Claim in Discord.' });
         log(job, 'info', `Reward ready for "${quest.name}". Claim manually on Discord: https://discord.com/quests`, { questId: target.id });
-        continue;
+        return;
       }
 
       if (quest.status === 'expired') {
         job.stats.skipped += 1;
         updateQuest(job, target.id, { state: 'skipped', message: 'This quest expired.' });
         log(job, 'warn', `${quest.name}: expired.`);
-        continue;
+        return;
       }
 
       if (!quest.task.supported) {
@@ -214,11 +218,11 @@ async function executeJob(session, job) {
         const reason = quest.task.manualReason ?? 'This task type is not supported.';
         updateQuest(job, target.id, { state: 'skipped', message: reason });
         log(job, 'warn', `${quest.name}: ${reason}`);
-        continue;
+        return;
       }
 
       updateQuest(job, target.id, { state: 'running', message: 'Working…' });
-      log(job, 'run', `${quest.name}: ${quest.task.text}.`, { questId: quest.id });
+      log(job, 'run', `${quest.name}: ${quest.task.text} (running in parallel).`, { questId: quest.id });
 
       try {
         await completeQuest(client, raw, {
@@ -238,7 +242,7 @@ async function executeJob(session, job) {
 
         if (shouldCancel()) {
           updateQuest(job, quest.id, { state: 'cancelled', message: 'Stopped.' });
-          break;
+          return;
         }
 
         job.stats.completed += 1;
@@ -251,15 +255,19 @@ async function executeJob(session, job) {
         });
         log(job, 'success', `${quest.name}: completed! Claim reward manually on Discord: https://discord.com/quests`, { questId: quest.id });
       } catch (error) {
-        if (error instanceof AuthError) throw error;
+        if (error instanceof AuthError) {
+          authFailure = error;
+          throw error;
+        }
         job.stats.failed += 1;
         const message = cleanError(error);
         updateQuest(job, quest.id, { state: 'failed', message });
         log(job, 'error', `${quest.name}: ${message}`, { questId: quest.id });
       }
+    };
 
-      if (!shouldCancel()) await sleep(1200);
-    }
+    // Run all quests concurrently in parallel
+    await Promise.all(job.targets.map((target, idx) => runTarget(target, idx)));
   } catch (error) {
     if (error instanceof AuthError) {
       authFailure = error;

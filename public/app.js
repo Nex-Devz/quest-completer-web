@@ -2226,34 +2226,37 @@ function updateBanner() {
   }
 
   const quests = Array.isArray(job.quests) ? job.quests : [];
-  const current =
-    quests.find((quest) => quest.state === 'running') ??
-    quests.find((quest) => quest.state === 'queued');
+  const runningList = quests.filter((quest) => quest.state === 'running');
+  const current = runningList[0] ?? quests.find((quest) => quest.state === 'queued');
   const processed = quests.filter((quest) =>
     ['done', 'failed', 'skipped', 'cancelled'].includes(quest.state),
   ).length;
   const percent = quests.length ? Math.round((processed / quests.length) * 100) : 0;
 
-  els.jbTitle.textContent = job.type === 'auto' ? 'Auto-run in progress' : 'Run in progress';
-  els.jbSub.textContent = current
-    ? `${current.name}${current.message ? ` · ${current.message}` : ''}`
-    : 'Preparing…';
+  els.jbTitle.textContent = job.type === 'auto' ? 'Auto-run in progress' : 'Parallel run in progress';
+  if (runningList.length > 1) {
+    els.jbSub.textContent = `${runningList.length} quests running simultaneously in parallel (${processed}/${quests.length} completed)`;
+  } else if (current) {
+    els.jbSub.textContent = `${current.name}${current.message ? ` · ${current.message}` : ''}`;
+  } else {
+    els.jbSub.textContent = 'Preparing…';
+  }
   els.jbBar.style.width = `${percent}%`;
   els.jbDot.classList.toggle('is-live', running);
   els.jbStop.disabled = false;
 
-  // Batch ETA calculation
+  // Parallel Batch ETA calculation
   const remainingQuests = quests.filter((q) => q.state === 'running' || q.state === 'queued');
   if (remainingQuests.length > 0 && els.jbEta && els.jbEtaText) {
-    let remainingSeconds = 0;
+    let maxRemainingSeconds = 0;
     for (const q of remainingQuests) {
       const target = q.target || 900;
       const progress = q.progress || 0;
-      remainingSeconds += Math.max(0, target - progress);
+      maxRemainingSeconds = Math.max(maxRemainingSeconds, Math.max(0, target - progress));
     }
     const count = remainingQuests.length;
-    const minutes = Math.max(1, Math.ceil(remainingSeconds / 60));
-    els.jbEtaText.textContent = `${count} quest${count === 1 ? '' : 's'} remaining · ~${minutes}m total`;
+    const minutes = Math.max(1, Math.ceil(maxRemainingSeconds / 60));
+    els.jbEtaText.textContent = `${count} quest${count === 1 ? '' : 's'} in parallel · ~${minutes}m total ETA`;
     els.jbEta.hidden = false;
   } else if (els.jbEta) {
     els.jbEta.hidden = true;
@@ -2355,36 +2358,40 @@ function tickActiveQuestProgress() {
   const job = state.currentJob;
   if (!job || job.status !== 'running' || !Array.isArray(job.quests)) return;
 
-  const currentQuest = job.quests.find((q) => q.state === 'running');
-  if (!currentQuest || !currentQuest.target || currentQuest.target <= 0) return;
+  const runningQuests = job.quests.filter((q) => q.state === 'running');
+  if (!runningQuests.length) return;
 
-  if (currentQuest.progress < currentQuest.target) {
-    currentQuest.progress = Math.min(currentQuest.target, (currentQuest.progress || 0) + 1);
-    currentQuest.percent = Math.min(100, Math.round((currentQuest.progress / currentQuest.target) * 100));
+  for (const currentQuest of runningQuests) {
+    if (!currentQuest.target || currentQuest.target <= 0) continue;
 
-    const progressClock = `${formatClock(currentQuest.progress)} / ${formatClock(currentQuest.target)}`;
-    const percentStr = `${currentQuest.percent}%`;
+    if (currentQuest.progress < currentQuest.target) {
+      currentQuest.progress = Math.min(currentQuest.target, (currentQuest.progress || 0) + 1);
+      currentQuest.percent = Math.min(100, Math.round((currentQuest.progress / currentQuest.target) * 100));
 
-    // 1. Update in Activity Drawer
-    const aqItem = els.activityQuests.querySelector(`[data-aq-id="${currentQuest.id}"]`);
-    if (aqItem) {
-      const trackSpan = aqItem.querySelector('.aq-track span');
-      const timeSpan = aqItem.querySelector('.aq-time');
-      const percentSpan = aqItem.querySelector('.aq-percent');
-      if (trackSpan) trackSpan.style.width = `${currentQuest.percent}%`;
-      if (timeSpan) timeSpan.textContent = progressClock;
-      if (percentSpan) percentSpan.textContent = `${percentStr} completed`;
-    }
+      const progressClock = `${formatClock(currentQuest.progress)} / ${formatClock(currentQuest.target)}`;
+      const percentStr = `${currentQuest.percent}%`;
 
-    // 2. Update in Main Dashboard Grid Card
-    const card = els.grid.querySelector(`[data-quest="${currentQuest.id}"]`);
-    if (card) {
-      const cardTrackSpan = card.querySelector('.progress-track span');
-      const cardTimeSpan = card.querySelector('.progress-copy strong');
-      const cardPercentSpan = card.querySelector('.progress-copy > span');
-      if (cardTrackSpan) cardTrackSpan.style.width = `${currentQuest.percent}%`;
-      if (cardTimeSpan) cardTimeSpan.textContent = progressClock;
-      if (cardPercentSpan) cardPercentSpan.textContent = `${percentStr} logged`;
+      // 1. Update in Activity Drawer
+      const aqItem = els.activityQuests?.querySelector(`[data-aq-id="${currentQuest.id}"]`);
+      if (aqItem) {
+        const trackSpan = aqItem.querySelector('.aq-track span');
+        const timeSpan = aqItem.querySelector('.aq-time');
+        const percentSpan = aqItem.querySelector('.aq-percent');
+        if (trackSpan) trackSpan.style.width = `${currentQuest.percent}%`;
+        if (timeSpan) timeSpan.textContent = progressClock;
+        if (percentSpan) percentSpan.textContent = `${percentStr} completed`;
+      }
+
+      // 2. Update in Main Dashboard Grid Card
+      const card = els.grid?.querySelector(`[data-quest="${currentQuest.id}"]`);
+      if (card) {
+        const cardTrackSpan = card.querySelector('.progress-track span');
+        const cardTimeSpan = card.querySelector('.progress-copy strong');
+        const cardPercentSpan = card.querySelector('.progress-copy > span');
+        if (cardTrackSpan) cardTrackSpan.style.width = `${currentQuest.percent}%`;
+        if (cardTimeSpan) cardTimeSpan.textContent = progressClock;
+        if (cardPercentSpan) cardPercentSpan.textContent = `${percentStr} logged`;
+      }
     }
   }
 }
