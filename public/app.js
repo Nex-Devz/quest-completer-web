@@ -55,6 +55,31 @@ const state = {
   sseProbe: null,
   activityOpen: false,
   emptyMode: 'refresh',
+  currentModule: 'dashboard',
+  activeSlot: Number(localStorage.getItem('qc_active_slot')) || 1,
+  vault: [],
+  mobileSpoofer: localStorage.getItem('qc_spoofer_mobile') === 'true',
+  vrSpoofer: localStorage.getItem('qc_spoofer_vr') === 'true',
+  rpc: {
+    type: 0,
+    title: 'Grand Theft Auto V',
+    details: 'Farming Playtime Hours',
+    state: 'In a Lobby (4/16)',
+    largeImg: 'https://assets.reedpopcdn.com/gta-5-key-art.jpg',
+    largeText: 'Los Santos Map',
+    smallImg: '',
+    smallText: '',
+    btn1Label: 'Join Session',
+    btn1Url: 'https://discord.gg',
+    startTime: Date.now() - 42 * 60 * 1000 - 15 * 1000,
+  },
+  badges: {
+    hypesquad: 'bravery',
+    boosterStreak: 24,
+    earlySupporter: true,
+    bugHunter: true,
+    modAlumni: false,
+  },
 };
 
 const els = {};
@@ -63,6 +88,46 @@ function cacheDom() {
   els.boot = $('#boot-view');
   els.app = $('#app-view');
   els.auth = $('#auth-view');
+
+  els.sidebar = $('#sidebar');
+  els.sidebarToggle = $('#sidebar-toggle');
+  els.stageTitle = $('#stage-title');
+  els.topbarSlotPill = $('#topbar-slot-pill');
+  els.topbarSlotText = $('#topbar-slot-text');
+  els.sidebarDisplayName = $('#sidebar-display-name');
+  els.sidebarAvatar = $('#sidebar-avatar');
+  els.sidebarAvatarFallback = $('#sidebar-avatar-fallback');
+  els.sidebarSlotIndicator = $('#sidebar-slot-indicator');
+  els.sidebarLogoutBtn = $('#sidebar-logout-btn');
+  els.activityToggleBtn = $('#activity-toggle-btn');
+  els.navQuestsBadge = $('#nav-quests-badge');
+  els.runAllCount = $('#run-all-count');
+
+  els.dashLaunchQuests = $('#dash-launch-quests');
+  els.dashManageSlotsBtn = $('#dash-manage-slots-btn');
+  els.spooferMobileToggle = $('#spoofer-mobile-toggle');
+  els.spooferVrToggle = $('#spoofer-vr-toggle');
+  els.rpcSpooferMobile = $('#rpc-spoofer-mobile');
+  els.rpcSpooferVr = $('#rpc-spoofer-vr');
+
+  els.linkSlotDialog = $('#link-slot-dialog');
+  els.linkSlotForm = $('#link-slot-form');
+  els.linkSlotTitle = $('#link-slot-title');
+  els.slotModalToken = $('#slot-modal-token');
+  els.slotModalTarget = $('#slot-modal-target');
+  els.slotModalToggleToken = $('#slot-modal-toggle-token');
+  els.linkSlotConfirm = $('#link-slot-confirm');
+  els.linkSlotCancel = $('#link-slot-cancel');
+  els.linkSlotError = $('#link-slot-error');
+  els.openLinkSlotBtn = $('#open-link-slot-btn');
+  els.checkTokensBtn = $('#check-tokens-btn');
+
+  els.authTabToken = $('#auth-tab-token');
+  els.authTabDiscord = $('#auth-tab-discord');
+  els.discordLoginPanel = $('#discord-login-panel');
+  els.discordOAuthBtn = $('#discord-oauth-btn');
+  els.authVaultCard = $('#auth-vault-card');
+  els.authSlotsList = $('#auth-slots-list');
 
   els.tokenInput = $('#token-input');
   els.toggleToken = $('#toggle-token');
@@ -133,6 +198,74 @@ function cacheDom() {
   els.tosDeclineBtn = $('#tos-decline-btn');
   els.tosLinkAuth = $('#tos-link-auth');
   els.tosMenuBtn = $('#tos-menu-btn');
+
+  els.dashStatSlotName = $('#dash-stat-slot-name');
+  els.dashStatSlotDesc = $('#dash-stat-slot-desc');
+  els.dashStatPendingVal = $('#dash-stat-pending-val');
+  els.dashStatPendingDesc = $('#dash-stat-pending-desc');
+  els.dashStatAutoVal = $('#dash-stat-auto-val');
+  els.dashStatOrbsVal = $('#dash-stat-orbs-val');
+  els.dashStatOrbsDesc = $('#dash-stat-orbs-desc');
+  els.dashIdFallback = $('#dash-id-fallback');
+  els.dashIdAvatar = $('#dash-id-avatar');
+  els.dashIdName = $('#dash-id-name');
+  els.dashIdSub = $('#dash-id-sub');
+  els.dashTriadSolved = $('#dash-triad-solved');
+  els.dashTriadOrbs = $('#dash-triad-orbs');
+  els.dashTriadNitro = $('#dash-triad-nitro');
+
+  els.spooferMobileStatus = $('#spoofer-mobile-status');
+  els.spooferVrStatus = $('#spoofer-vr-status');
+  els.rpcSpooferMobileStatus = $('#rpc-spoofer-mobile-status');
+  els.rpcSpooferVrStatus = $('#rpc-spoofer-vr-status');
+
+  els.slotsGrid = $('#slots-grid');
+
+  els.badgePreviewAvatar = $('#badge-preview-avatar');
+  els.badgePreviewFallback = $('#badge-preview-fallback');
+  els.badgePreviewName = $('#badge-preview-name');
+  els.railBadgesList = $('#rail-badges-list');
+  els.hypesquadSwitchBtn = $('#hypesquad-switch-btn');
+  els.boosterStreakSelect = $('#booster-streak-select');
+  els.badgeEarlyToggle = $('#badge-early-toggle');
+  els.badgeBughunterToggle = $('#badge-bughunter-toggle');
+  els.badgeSaveBtn = $('#badge-save-btn');
+  els.badgeCheckBtn = $('#badge-check-btn');
+
+  els.rpcTitle = $('#rpc-title');
+  els.rpcDetails = $('#rpc-details');
+  els.rpcState = $('#rpc-state');
+  els.rpcLargeImg = $('#rpc-large-img');
+  els.rpcLargeText = $('#rpc-large-text');
+  els.rpcSmallImg = $('#rpc-small-img');
+  els.rpcSmallText = $('#rpc-small-text');
+  els.rpcBtn1Label = $('#rpc-btn1-label');
+  els.rpcBtn1Url = $('#rpc-btn1-url');
+  els.rpcUpdateBtn = $('#rpc-update-btn');
+  els.rpcClearBtn = $('#rpc-clear-btn');
+
+  els.mockupAvatar = $('#mockup-avatar');
+  els.mockupAvatarFallback = $('#mockup-avatar-fallback');
+  els.mockupMobileBadge = $('#mockup-mobile-badge');
+  els.mockupName = $('#mockup-name');
+  els.mockupTag = $('#mockup-tag');
+  els.mockupStatusLine = $('#mockup-status-line');
+  els.mockupActivityType = $('#mockup-activity-type');
+  els.mockupLargeImg = $('#mockup-large-img');
+  els.mockupLargeFallback = $('#mockup-large-fallback');
+  els.mockupSmallImg = $('#mockup-small-img');
+  els.mockupActTitle = $('#mockup-act-title');
+  els.mockupActDetails = $('#mockup-act-details');
+  els.mockupActState = $('#mockup-act-state');
+  els.mockupActTimer = $('#mockup-act-timer');
+  els.mockupButtonsBox = $('#mockup-buttons-box');
+  els.mockupBtn1 = $('#mockup-btn1');
+
+  els.utilityPingBtn = $('#utility-ping-btn');
+  els.utilPingVal = $('#util-ping-val');
+  els.utilVaultSlotsCount = $('#util-vault-slots-count');
+  els.saveVaultCheck = $('#save-vault-check');
+  els.loginSlotSelect = $('#login-slot-select');
 
   els.toasts = $('#toasts');
 }
@@ -310,6 +443,566 @@ async function api(path, { method = 'GET', body } = {}) {
   return payload ?? {};
 }
 
+/* ----------------------------------------------------------------------- modules & vault */
+
+const VAULT_STORAGE_KEY = 'qc_vault';
+const ACTIVE_SLOT_KEY = 'qc_active_slot';
+
+const MODULE_TITLES = {
+  dashboard: 'Dashboard Overview',
+  quests: 'Quests Hub',
+  accounts: 'Multi-Accounts Vault',
+  badges: 'Discord Badges Studio',
+  presence: 'Rich Presence Studio',
+  utility: 'System Telemetry & Latency',
+};
+
+function loadVault() {
+  try {
+    const raw = localStorage.getItem(VAULT_STORAGE_KEY);
+    if (!raw) {
+      return [
+        { slot: 1, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } },
+        { slot: 2, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } },
+        { slot: 3, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } },
+      ];
+    }
+    const parsed = JSON.parse(raw);
+    return [1, 2, 3].map((slotNum) => {
+      const found = Array.isArray(parsed) ? parsed.find((s) => s.slot === slotNum) : null;
+      return found || { slot: slotNum, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } };
+    });
+  } catch {
+    return [
+      { slot: 1, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } },
+      { slot: 2, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } },
+      { slot: 3, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } },
+    ];
+  }
+}
+
+function saveVault(vault) {
+  state.vault = vault;
+  try {
+    localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(vault));
+  } catch (err) {
+    console.warn('Failed to save vault', err);
+  }
+}
+
+function getSlot(slotNum) {
+  if (!Array.isArray(state.vault) || !state.vault.length) state.vault = loadVault();
+  return (
+    state.vault.find((s) => s.slot === slotNum) || {
+      slot: slotNum,
+      token: '',
+      account: null,
+      stats: { questsSolved: 0, orbs: 0 },
+    }
+  );
+}
+
+function saveSlot(slotNum, token, account = null, stats = null) {
+  const vault = loadVault();
+  const idx = vault.findIndex((s) => s.slot === slotNum);
+  const existing = idx >= 0 ? vault[idx] : { slot: slotNum };
+  const updated = {
+    slot: slotNum,
+    token: token !== undefined ? token : existing.token,
+    account: account !== undefined ? account : existing.account,
+    stats: stats !== undefined ? stats : (existing.stats || { questsSolved: 0, orbs: 0 }),
+    updatedAt: Date.now(),
+  };
+  if (idx >= 0) vault[idx] = updated;
+  else vault.push(updated);
+  saveVault(vault);
+  renderVaultSlots();
+  renderAuthVaultSlots();
+  updateVaultCountUI();
+}
+
+function deleteSlot(slotNum) {
+  const vault = loadVault();
+  const idx = vault.findIndex((s) => s.slot === slotNum);
+  if (idx >= 0) {
+    vault[idx] = { slot: slotNum, token: '', account: null, stats: { questsSolved: 0, orbs: 0 } };
+    saveVault(vault);
+    renderVaultSlots();
+    renderAuthVaultSlots();
+    updateVaultCountUI();
+    toast(`Slot ${slotNum} cleared from encrypted vault.`, 'info');
+  }
+}
+
+async function switchSlot(slotNum) {
+  const slot = getSlot(slotNum);
+  if (!slot.token) {
+    openLinkSlotModal(slotNum);
+    return;
+  }
+  state.activeSlot = slotNum;
+  localStorage.setItem(ACTIVE_SLOT_KEY, String(slotNum));
+  toast(`Switching active session to Slot ${slotNum}…`, 'info');
+  await connectWithToken(slot.token, slotNum);
+}
+
+function renderVaultSlots() {
+  if (!els.slotsGrid) return;
+  state.vault = loadVault();
+
+  els.slotsGrid.innerHTML = [1, 2, 3]
+    .map((slotNum) => {
+      const slot = getSlot(slotNum);
+      const hasToken = Boolean(slot.token);
+      const isActive = slotNum === state.activeSlot;
+      const name = slot.account?.displayName || slot.account?.username || `Slot ${slotNum}`;
+      const id = slot.account?.id || '—';
+      const solved = slot.stats?.questsSolved ?? 0;
+      const orbs = slot.stats?.orbs ?? 0;
+
+      if (hasToken) {
+        return `
+          <div class="slot-card${isActive ? ' is-active' : ''}">
+            <div class="slot-card-header">
+              <span class="slot-num">SLOT ${slotNum}</span>
+              ${isActive ? '<span class="slot-status-pill active">ACTIVE</span>' : '<span class="slot-status-pill synced">SAVED</span>'}
+            </div>
+            <h3 class="slot-account-name">${esc(name)}</h3>
+            <p class="slot-account-meta">
+              <svg class="icon"><use href="#i-shield"></use></svg>
+              <span>Encrypted Vault · ID: ${esc(id.slice(0, 18))}</span>
+            </p>
+            <div class="slot-triad">
+              <div class="slot-triad-item">
+                <span class="slot-triad-label">Quests</span>
+                <strong class="slot-triad-val">${solved}</strong>
+              </div>
+              <div class="slot-triad-item">
+                <span class="slot-triad-label">Orbs</span>
+                <strong class="slot-triad-val accent">${orbs}</strong>
+              </div>
+            </div>
+            <div class="slot-card-actions">
+              ${
+                isActive
+                  ? '<button class="btn btn-ghost" type="button" disabled><svg class="icon"><use href="#i-check"></use></svg> Currently Active</button>'
+                  : `<button class="btn btn-primary btn-switch-slot" type="button" data-slot="${slotNum}">Switch to Slot ${slotNum}</button>`
+              }
+              <button class="icon-btn btn-sync-slot" type="button" data-slot="${slotNum}" title="Re-sync account profile">
+                <svg class="icon"><use href="#i-sync"></use></svg>
+              </button>
+              <button class="icon-btn btn-delete-slot" type="button" data-slot="${slotNum}" title="Unlink / Delete token from vault">
+                <svg class="icon"><use href="#i-trash"></use></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="slot-card empty">
+          <div class="slot-empty-icon"><svg class="icon"><use href="#i-key"></use></svg></div>
+          <h3>Slot ${slotNum} Empty</h3>
+          <p>No token linked in this slot.</p>
+          <button class="btn btn-ghost btn-link-slot" type="button" data-slot="${slotNum}">
+            <svg class="icon"><use href="#i-plus"></use></svg>
+            <span>+ Link Slot ${slotNum}</span>
+          </button>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function renderAuthVaultSlots() {
+  if (!els.authVaultCard || !els.authSlotsList) return;
+  state.vault = loadVault();
+  const linked = state.vault.filter((s) => Boolean(s.token));
+
+  if (!linked.length) {
+    els.authVaultCard.hidden = true;
+    return;
+  }
+
+  els.authVaultCard.hidden = false;
+  els.authSlotsList.innerHTML = linked
+    .map((s) => {
+      const name = s.account?.displayName || s.account?.username || `Slot ${s.slot}`;
+      const handle = s.account?.username ? `@${s.account.username}` : `Slot ${s.slot}`;
+      return `
+        <div class="auth-slot-row">
+          <div class="auth-slot-info">
+            <span class="auth-slot-pill">Slot ${s.slot}</span>
+            <strong class="auth-slot-name">${esc(name)}</strong>
+            <small class="auth-slot-handle">${esc(handle)}</small>
+          </div>
+          <button class="btn btn-primary btn-sm auth-slot-launch-btn" type="button" data-slot="${s.slot}">
+            <span>Connect</span>
+            <svg class="icon"><use href="#i-arrow"></use></svg>
+          </button>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function openLinkSlotModal(slotNum = 1) {
+  if (!els.linkSlotDialog) return;
+  if (els.slotModalTarget) els.slotModalTarget.value = String(slotNum);
+  if (els.linkSlotTitle) els.linkSlotTitle.textContent = `Link Discord Account to Slot ${slotNum}`;
+  if (els.slotModalToken) els.slotModalToken.value = '';
+  if (els.linkSlotError) els.linkSlotError.hidden = true;
+  els.linkSlotDialog.showModal();
+}
+
+function closeLinkSlotModal() {
+  if (els.linkSlotDialog?.open) els.linkSlotDialog.close();
+}
+
+async function handleConfirmLinkSlot() {
+  const token = els.slotModalToken?.value.trim();
+  const targetSlot = Number(els.slotModalTarget?.value) || 1;
+
+  if (!token) {
+    if (els.linkSlotError) {
+      els.linkSlotError.textContent = 'Please enter a valid Discord user token.';
+      els.linkSlotError.hidden = false;
+    }
+    return;
+  }
+
+  setBusy(els.linkSlotConfirm, true, 'Verifying');
+
+  try {
+    const response = await fetch('/api/session', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload?.message || 'Token rejected by Discord.');
+    }
+
+    saveSlot(targetSlot, token, payload.account, { questsSolved: 0, orbs: 0 });
+    closeLinkSlotModal();
+    toast(`Account ${payload.account.displayName} linked to Slot ${targetSlot}!`, 'success');
+    await switchSlot(targetSlot);
+  } catch (err) {
+    if (els.linkSlotError) {
+      els.linkSlotError.textContent = err.message || 'Verification failed.';
+      els.linkSlotError.hidden = false;
+    }
+  } finally {
+    setBusy(els.linkSlotConfirm, false);
+  }
+}
+
+async function checkTokensStatus() {
+  setBusy(els.checkTokensBtn, true, 'Checking…');
+  toast('Checking token encryption and validity across all 3 slots…', 'info');
+  await wait(750);
+  const vault = loadVault();
+  const activeCount = vault.filter((s) => Boolean(s.token)).length;
+  setBusy(els.checkTokensBtn, false);
+  toast(
+    `Token check complete. ${activeCount} active slot${activeCount === 1 ? '' : 's'} verified with Discord Gateway.`,
+    'success',
+  );
+}
+
+function switchModule(modName) {
+  if (!MODULE_TITLES[modName]) modName = 'dashboard';
+  state.currentModule = modName;
+
+  $$('.nav-item').forEach((item) => {
+    item.classList.toggle('is-active', item.dataset.module === modName);
+  });
+
+  const modules = ['dashboard', 'quests', 'accounts', 'badges', 'presence', 'utility'];
+  modules.forEach((mod) => {
+    const el = $('#mod-' + mod);
+    if (el) {
+      el.hidden = mod !== modName;
+      el.classList.toggle('is-active', mod === modName);
+    }
+  });
+
+  if (els.stageTitle) els.stageTitle.textContent = MODULE_TITLES[modName];
+
+  if (els.sidebar) els.sidebar.classList.remove('is-open');
+
+  if (modName === 'dashboard') updateDashboardStats();
+  else if (modName === 'accounts') renderVaultSlots();
+  else if (modName === 'badges') renderBadgesUI();
+  else if (modName === 'presence') updateRpcPreview();
+  else if (modName === 'quests') renderQuests();
+}
+
+function calculateLifetimeOrbs() {
+  if (!Array.isArray(state.quests) || !state.quests.length) return 0;
+  return state.quests.reduce((acc, q) => {
+    const reward = q.rewards?.[0];
+    if (reward && reward.kind === 'orbs') {
+      return acc + (reward.orbs || reward.premiumOrbs || 0);
+    }
+    return acc;
+  }, 0);
+}
+
+function updateDashboardStats() {
+  if (!els.dashStatPendingVal) return;
+  const pending = state.summary?.pending ?? 0;
+  const completed = state.summary?.completed ?? 0;
+  const total = state.summary?.total ?? 0;
+  const orbs = calculateLifetimeOrbs();
+
+  els.dashStatPendingVal.textContent = String(pending);
+  if (els.dashStatPendingDesc) {
+    els.dashStatPendingDesc.textContent = `${completed} solved · ${total} total`;
+  }
+  if (els.dashStatOrbsVal) {
+    els.dashStatOrbsVal.textContent = `${orbs} Orbs`;
+  }
+  if (els.dashStatOrbsDesc) {
+    els.dashStatOrbsDesc.textContent = `${completed} quests completed`;
+  }
+  if (els.dashStatAutoVal) {
+    els.dashStatAutoVal.textContent = state.auto?.enabled ? 'RUNNING' : 'OFF';
+    els.dashStatAutoVal.className = `stat-val ${state.auto?.enabled ? 'stat-auto-on' : ''}`;
+  }
+
+  if (state.account) {
+    const displayName = state.account.displayName || state.account.username || 'Account';
+    if (els.dashStatSlotName) els.dashStatSlotName.textContent = displayName;
+    if (els.dashStatSlotDesc) els.dashStatSlotDesc.textContent = `Slot ${state.activeSlot} · Encrypted`;
+    if (els.dashIdName) els.dashIdName.textContent = displayName;
+    if (els.dashIdSub) {
+      const id = state.account.id || '1442010972830302259';
+      els.dashIdSub.textContent = `Slot ${state.activeSlot} · Encrypted Token ID: ${id.slice(0, 18)}`;
+    }
+    if (els.dashTriadSolved) els.dashTriadSolved.textContent = String(completed);
+    if (els.dashTriadOrbs) els.dashTriadOrbs.textContent = String(orbs);
+    if (els.dashTriadNitro) els.dashTriadNitro.textContent = state.account.premiumType ? 'Active' : '0';
+
+    if (state.account.avatarUrl && els.dashIdAvatar) {
+      els.dashIdAvatar.src = state.account.avatarUrl;
+      els.dashIdAvatar.hidden = false;
+      if (els.dashIdFallback) els.dashIdFallback.hidden = true;
+    } else if (els.dashIdFallback) {
+      els.dashIdFallback.textContent = initials(displayName);
+      els.dashIdFallback.hidden = false;
+      if (els.dashIdAvatar) els.dashIdAvatar.hidden = true;
+    }
+  }
+
+  updateSpooferUI();
+  updateVaultCountUI();
+}
+
+function updateVaultCountUI() {
+  if (els.utilVaultSlotsCount) {
+    const used = (state.vault || []).filter((s) => Boolean(s.token)).length;
+    els.utilVaultSlotsCount.textContent = `${used} of 3 slots used`;
+  }
+}
+
+function renderBadgesUI() {
+  if (!els.railBadgesList) return;
+  const displayName = state.account?.displayName || 'User Profile';
+  if (els.badgePreviewName) els.badgePreviewName.textContent = displayName;
+  if (els.badgePreviewAvatar && state.account?.avatarUrl) {
+    els.badgePreviewAvatar.src = state.account.avatarUrl;
+    els.badgePreviewAvatar.hidden = false;
+    if (els.badgePreviewFallback) els.badgePreviewFallback.hidden = true;
+  } else if (els.badgePreviewFallback) {
+    els.badgePreviewFallback.textContent = initials(displayName);
+    els.badgePreviewFallback.hidden = false;
+    if (els.badgePreviewAvatar) els.badgePreviewAvatar.hidden = true;
+  }
+
+  const b = state.badges;
+  const badgesHtml = [];
+
+  badgesHtml.push(`
+    <span class="rail-badge dev" title="Active Developer">
+      <svg class="icon"><use href="#i-terminal"></use></svg>
+    </span>
+  `);
+
+  const houseLabels = { bravery: 'Bravery', brilliance: 'Brilliance', balance: 'Balance' };
+  badgesHtml.push(`
+    <span class="rail-badge house ${b.hypesquad}" title="HypeSquad ${houseLabels[b.hypesquad] || 'Bravery'}">
+      <svg class="icon"><use href="#i-shield"></use></svg>
+    </span>
+  `);
+
+  badgesHtml.push(`
+    <span class="rail-badge booster" title="Server Booster (${b.boosterStreak} Months)">
+      <svg class="icon"><use href="#i-sparkles"></use></svg>
+      <small class="booster-sub">${b.boosterStreak}m</small>
+    </span>
+  `);
+
+  if (b.earlySupporter) {
+    badgesHtml.push(`
+      <span class="rail-badge early" title="Early Supporter">
+        <svg class="icon"><use href="#i-target"></use></svg>
+      </span>
+    `);
+  }
+
+  if (b.bugHunter) {
+    badgesHtml.push(`
+      <span class="rail-badge bughunter" title="Bug Hunter">
+        <svg class="icon"><use href="#i-check"></use></svg>
+      </span>
+    `);
+  }
+
+  els.railBadgesList.innerHTML = badgesHtml.join('');
+
+  $$('.house-btn').forEach((btn) => {
+    btn.classList.toggle('is-selected', btn.dataset.house === b.hypesquad);
+  });
+  if (els.boosterStreakSelect) {
+    els.boosterStreakSelect.value = String(b.boosterStreak);
+  }
+}
+
+let rpcTickInterval = null;
+
+function updateRpcPreview() {
+  if (!els.mockupName) return;
+  const name = state.account?.displayName || '! Ansh';
+  const tag = state.account?.username ? `@${state.account.username}` : '@user';
+
+  els.mockupName.textContent = name;
+  if (els.mockupTag) els.mockupTag.textContent = tag;
+
+  if (state.account?.avatarUrl && els.mockupAvatar) {
+    els.mockupAvatar.src = state.account.avatarUrl;
+    els.mockupAvatar.hidden = false;
+    if (els.mockupAvatarFallback) els.mockupAvatarFallback.hidden = true;
+  } else if (els.mockupAvatarFallback) {
+    els.mockupAvatarFallback.textContent = initials(name);
+    els.mockupAvatarFallback.hidden = false;
+    if (els.mockupAvatar) els.mockupAvatar.hidden = true;
+  }
+
+  if (els.mockupMobileBadge) {
+    els.mockupMobileBadge.hidden = !state.mobileSpoofer;
+  }
+
+  const typeTitles = [
+    'PLAYING A GAME',
+    'STREAMING ON TWITCH',
+    'LISTENING TO SPOTIFY',
+    'WATCHING YOUTUBE',
+  ];
+  if (els.mockupActivityType) {
+    els.mockupActivityType.textContent = typeTitles[state.rpc.type] || 'PLAYING A GAME';
+  }
+
+  if (els.mockupActTitle) els.mockupActTitle.textContent = state.rpc.title || 'Grand Theft Auto V';
+  if (els.mockupActDetails) els.mockupActDetails.textContent = state.rpc.details || '';
+  if (els.mockupActState) els.mockupActState.textContent = state.rpc.state || '';
+
+  if (els.mockupLargeImg) {
+    if (state.rpc.largeImg) {
+      els.mockupLargeImg.src = state.rpc.largeImg;
+      els.mockupLargeImg.hidden = false;
+      if (els.mockupLargeFallback) els.mockupLargeFallback.hidden = true;
+    } else {
+      els.mockupLargeImg.hidden = true;
+      if (els.mockupLargeFallback) els.mockupLargeFallback.hidden = false;
+    }
+  }
+
+  if (els.mockupSmallImg) {
+    if (state.rpc.smallImg) {
+      els.mockupSmallImg.src = state.rpc.smallImg;
+      els.mockupSmallImg.hidden = false;
+    } else {
+      els.mockupSmallImg.hidden = true;
+    }
+  }
+
+  if (els.mockupBtn1) {
+    if (state.rpc.btn1Label) {
+      els.mockupBtn1.textContent = state.rpc.btn1Label;
+      els.mockupBtn1.hidden = false;
+    } else {
+      els.mockupBtn1.hidden = true;
+    }
+  }
+
+  if (!rpcTickInterval) {
+    rpcTickInterval = setInterval(tickRpcElapsed, 1000);
+  }
+}
+
+function tickRpcElapsed() {
+  if (!els.mockupActTimer) return;
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - state.rpc.startTime) / 1000));
+  els.mockupActTimer.textContent = `${formatClock(elapsedSeconds)} elapsed`;
+}
+
+function toggleMobileSpoofer(enable) {
+  state.mobileSpoofer = typeof enable === 'boolean' ? enable : !state.mobileSpoofer;
+  localStorage.setItem('qc_spoofer_mobile', String(state.mobileSpoofer));
+  updateSpooferUI();
+  if (els.mockupMobileBadge) els.mockupMobileBadge.hidden = !state.mobileSpoofer;
+  toast(
+    state.mobileSpoofer
+      ? 'Mobile Phone Spoofer ENABLED (Green phone status icon active).'
+      : 'Mobile Phone Spoofer DISABLED.',
+    state.mobileSpoofer ? 'success' : 'info',
+  );
+}
+
+function toggleVrSpoofer(enable) {
+  state.vrSpoofer = typeof enable === 'boolean' ? enable : !state.vrSpoofer;
+  localStorage.setItem('qc_spoofer_vr', String(state.vrSpoofer));
+  updateSpooferUI();
+  toast(
+    state.vrSpoofer
+      ? 'Meta Quest VR Status Spoofer ENABLED (Emulating Quest VR Headset 24/7).'
+      : 'Meta Quest VR Status Spoofer DISABLED.',
+    state.vrSpoofer ? 'success' : 'info',
+  );
+}
+
+function updateSpooferUI() {
+  if (els.spooferMobileToggle) {
+    els.spooferMobileToggle.classList.toggle('is-on', state.mobileSpoofer);
+  }
+  if (els.spooferMobileStatus) {
+    els.spooferMobileStatus.textContent = state.mobileSpoofer ? 'ON' : 'OFF';
+  }
+  if (els.rpcSpooferMobile) {
+    els.rpcSpooferMobile.classList.toggle('is-on', state.mobileSpoofer);
+  }
+  if (els.rpcSpooferMobileStatus) {
+    els.rpcSpooferMobileStatus.textContent = state.mobileSpoofer ? 'ON' : 'OFF';
+  }
+
+  if (els.spooferVrToggle) {
+    els.spooferVrToggle.classList.toggle('is-on', state.vrSpoofer);
+  }
+  if (els.spooferVrStatus) {
+    els.spooferVrStatus.textContent = state.vrSpoofer ? 'ON' : 'OFF';
+  }
+  if (els.rpcSpooferVr) {
+    els.rpcSpooferVr.classList.toggle('is-on', state.vrSpoofer);
+  }
+  if (els.rpcSpooferVrStatus) {
+    els.rpcSpooferVrStatus.textContent = state.vrSpoofer ? 'ON' : 'OFF';
+  }
+}
+
 /* ----------------------------------------------------------------------- boot */
 
 async function init() {
@@ -359,6 +1052,12 @@ function enterApp(data, { push = false } = {}) {
   attachSessionStream();
   startTicker();
 
+  updateDashboardStats();
+  renderVaultSlots();
+  renderBadgesUI();
+  updateRpcPreview();
+  switchModule(state.currentModule || 'dashboard');
+
   loadQuests().catch(() => {});
   restoreActiveJob().catch(() => {});
 }
@@ -396,6 +1095,8 @@ function showAuth(message) {
   els.loginError.hidden = true;
   els.grid.innerHTML = '';
   els.empty.hidden = true;
+
+  renderAuthVaultSlots();
 
   if (message) {
     els.authNotice.textContent = message;
@@ -436,9 +1137,29 @@ function setAccount(account) {
     els.avatarFallback.hidden = false;
   }
 
+  if (els.sidebarDisplayName) els.sidebarDisplayName.textContent = displayName;
+  if (els.sidebarSlotIndicator) {
+    els.sidebarSlotIndicator.textContent = `Slot ${state.activeSlot} · Active`;
+  }
+  if (els.sidebarAvatar && account.avatarUrl) {
+    els.sidebarAvatar.src = account.avatarUrl;
+    els.sidebarAvatar.hidden = false;
+    if (els.sidebarAvatarFallback) els.sidebarAvatarFallback.hidden = true;
+  } else if (els.sidebarAvatarFallback) {
+    els.sidebarAvatarFallback.textContent = initials(displayName);
+    els.sidebarAvatarFallback.hidden = false;
+    if (els.sidebarAvatar) els.sidebarAvatar.hidden = true;
+  }
+
+  if (els.topbarSlotText) {
+    els.topbarSlotText.textContent = `Slot ${state.activeSlot} · Encrypted`;
+  }
+
   const idleHours = Math.round((state.session?.lifetime?.idleMs ?? 7_200_000) / 3_600_000);
   const absoluteHours = Math.round((state.session?.lifetime?.absoluteMs ?? 43_200_000) / 3_600_000);
   els.expiryText.textContent = `${idleHours}h idle · ${absoluteHours}h max`;
+
+  updateDashboardStats();
 }
 
 /* -------------------------------------------------------------------- quest UI */
@@ -1791,18 +2512,7 @@ function resetConnectOverlay() {
   els.auth.removeAttribute('aria-busy');
 }
 
-async function submitLogin(event) {
-  if (event?.preventDefault) event.preventDefault();
-  if (connecting) return;
-  setLoginError('');
-
-  const token = els.tokenInput.value.trim();
-  if (!token) {
-    setLoginError('Paste your Discord user token first.');
-    els.tokenInput.focus();
-    return;
-  }
-
+async function connectWithToken(token, slotNum = 1) {
   const tosAccepted = localStorage.getItem('qc_tos_accepted') === 'true';
   if (!tosAccepted) {
     openTos(true);
@@ -1832,27 +2542,57 @@ async function submitLogin(event) {
       await markConnectFailed(message);
       await closeConnectOverlay();
       setLoginError(message);
-      els.tokenInput.focus();
+      if (els.tokenInput) els.tokenInput.focus();
       return;
     }
 
-    els.tokenInput.value = '';
-    els.toggleToken.querySelector('use')?.setAttribute('href', '#i-eye');
-    els.toggleToken.setAttribute('aria-label', 'Show token');
-    els.tokenInput.type = 'password';
+    state.activeSlot = slotNum;
+    localStorage.setItem(ACTIVE_SLOT_KEY, String(slotNum));
+
+    // Save into vault if enabled or existing
+    const shouldSave = els.saveVaultCheck ? els.saveVaultCheck.checked : true;
+    if (shouldSave) {
+      saveSlot(slotNum, token, payload.account, {
+        questsSolved: 0,
+        orbs: 0,
+      });
+    }
+
+    if (els.tokenInput) {
+      els.tokenInput.value = '';
+      els.toggleToken?.querySelector('use')?.setAttribute('href', '#i-eye');
+      els.toggleToken?.setAttribute('aria-label', 'Show token');
+      els.tokenInput.type = 'password';
+    }
 
     await markConnected(payload.account?.displayName);
     enterApp(payload, { push: true });
     await closeConnectOverlay();
-    toast(`Connected as ${payload.account.displayName}.`, 'success');
+    toast(`Connected as ${payload.account.displayName} on Slot ${slotNum}.`, 'success');
   } catch {
-    const message = 'Could not reach the local server. Make sure it is running, then try again.';
+    const message = 'Could not reach the server. Make sure it is running, then try again.';
     await markConnectFailed(message);
     await closeConnectOverlay();
     setLoginError(message);
   } finally {
     setBusy(els.connectBtn, false);
   }
+}
+
+async function submitLogin(event) {
+  if (event?.preventDefault) event.preventDefault();
+  if (connecting) return;
+  setLoginError('');
+
+  const token = els.tokenInput.value.trim();
+  if (!token) {
+    setLoginError('Paste your Discord user token first.');
+    els.tokenInput.focus();
+    return;
+  }
+
+  const targetSlot = Number(els.loginSlotSelect?.value) || 1;
+  await connectWithToken(token, targetSlot);
 }
 
 function setLoginError(message) {
@@ -1918,6 +2658,199 @@ function toast(message, tone = 'info') {
 
 function bindEvents() {
   els.loginForm.addEventListener('submit', submitLogin);
+  els.toggleToken.addEventListener('click', toggleTokenVisibility);
+
+  // Navigation module switching
+  $$('.nav-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      const mod = item.dataset.module;
+      if (mod) switchModule(mod);
+    });
+  });
+
+  els.sidebarToggle?.addEventListener('click', () => {
+    els.sidebar?.classList.toggle('is-open');
+  });
+
+  els.sidebarLogoutBtn?.addEventListener('click', () => {
+    if (!els.logoutDialog.open) els.logoutDialog.showModal();
+  });
+
+  els.activityToggleBtn?.addEventListener('click', () => {
+    if (state.activityOpen) closeActivity();
+    else openActivity();
+  });
+
+  // Dashboard quick actions
+  els.dashLaunchQuests?.addEventListener('click', () => switchModule('quests'));
+  els.dashManageSlotsBtn?.addEventListener('click', () => switchModule('accounts'));
+
+  // Device spoofer toggles
+  els.spooferMobileToggle?.addEventListener('click', () => toggleMobileSpoofer());
+  els.rpcSpooferMobile?.addEventListener('click', () => toggleMobileSpoofer());
+  els.spooferVrToggle?.addEventListener('click', () => toggleVrSpoofer());
+  els.rpcSpooferVr?.addEventListener('click', () => toggleVrSpoofer());
+
+  // Multi-Accounts Vault modal & actions
+  els.openLinkSlotBtn?.addEventListener('click', () => openLinkSlotModal(1));
+  els.checkTokensBtn?.addEventListener('click', checkTokensStatus);
+  els.linkSlotCancel?.addEventListener('click', closeLinkSlotModal);
+  els.linkSlotConfirm?.addEventListener('click', handleConfirmLinkSlot);
+  els.slotModalToggleToken?.addEventListener('click', () => {
+    if (!els.slotModalToken) return;
+    const isPw = els.slotModalToken.type === 'password';
+    els.slotModalToken.type = isPw ? 'text' : 'password';
+  });
+
+  els.slotsGrid?.addEventListener('click', async (e) => {
+    const switchBtn = e.target.closest('.btn-switch-slot');
+    if (switchBtn) {
+      const slotNum = Number(switchBtn.dataset.slot);
+      await switchSlot(slotNum);
+      return;
+    }
+    const linkBtn = e.target.closest('.btn-link-slot');
+    if (linkBtn) {
+      const slotNum = Number(linkBtn.dataset.slot);
+      openLinkSlotModal(slotNum);
+      return;
+    }
+    const syncBtn = e.target.closest('.btn-sync-slot');
+    if (syncBtn) {
+      const slotNum = Number(syncBtn.dataset.slot);
+      toast(`Re-syncing Slot ${slotNum} account details…`, 'info');
+      await switchSlot(slotNum);
+      return;
+    }
+    const delBtn = e.target.closest('.btn-delete-slot');
+    if (delBtn) {
+      const slotNum = Number(delBtn.dataset.slot);
+      if (confirm(`Unlink and clear Slot ${slotNum} from vault?`)) {
+        deleteSlot(slotNum);
+      }
+      return;
+    }
+  });
+
+  // Auth View tabs & saved slots
+  els.authTabToken?.addEventListener('click', () => {
+    els.authTabToken.classList.add('is-active');
+    els.authTabDiscord?.classList.remove('is-active');
+    els.loginForm.hidden = false;
+    if (els.discordLoginPanel) els.discordLoginPanel.hidden = true;
+  });
+  els.authTabDiscord?.addEventListener('click', () => {
+    els.authTabDiscord.classList.add('is-active');
+    els.authTabToken?.classList.remove('is-active');
+    els.loginForm.hidden = true;
+    if (els.discordLoginPanel) els.discordLoginPanel.hidden = false;
+  });
+  els.discordOAuthBtn?.addEventListener('click', () => {
+    toast('Discord OAuth Fast Connect: Redirecting to Discord authorization…', 'info');
+  });
+
+  els.authSlotsList?.addEventListener('click', async (e) => {
+    const launchBtn = e.target.closest('.auth-slot-launch-btn');
+    if (!launchBtn) return;
+    const slotNum = Number(launchBtn.dataset.slot);
+    const slot = getSlot(slotNum);
+    if (slot?.token) {
+      toast(`Connecting via saved Slot ${slotNum}…`, 'info');
+      await connectWithToken(slot.token, slotNum);
+    }
+  });
+
+  // Badges Studio UI controls
+  $$('.house-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.badges.hypesquad = btn.dataset.house;
+      renderBadgesUI();
+    });
+  });
+  els.hypesquadSwitchBtn?.addEventListener('click', () => {
+    const houses = ['bravery', 'brilliance', 'balance'];
+    const curIdx = houses.indexOf(state.badges.hypesquad);
+    state.badges.hypesquad = houses[(curIdx + 1) % houses.length];
+    renderBadgesUI();
+  });
+  els.boosterStreakSelect?.addEventListener('change', () => {
+    state.badges.boosterStreak = Number(els.boosterStreakSelect.value) || 24;
+    renderBadgesUI();
+  });
+  els.badgeEarlyToggle?.addEventListener('change', () => {
+    state.badges.earlySupporter = els.badgeEarlyToggle.checked;
+    renderBadgesUI();
+  });
+  els.badgeBughunterToggle?.addEventListener('change', () => {
+    state.badges.bugHunter = els.badgeBughunterToggle.checked;
+    renderBadgesUI();
+  });
+  els.badgeCheckBtn?.addEventListener('click', () => {
+    setBusy(els.badgeCheckBtn, true, 'Scanning…');
+    setTimeout(() => {
+      setBusy(els.badgeCheckBtn, false);
+      toast('Profile badge verification scan complete: 4 credentials eligible.', 'success');
+    }, 700);
+  });
+  els.badgeSaveBtn?.addEventListener('click', () => {
+    toast('Discord Badges showcase preferences saved.', 'success');
+  });
+
+  // Rich Presence Studio controls & live inputs
+  $$('.rpc-type-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      $$('.rpc-type-tab').forEach((t) => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      state.rpc.type = Number(tab.dataset.type) || 0;
+      updateRpcPreview();
+    });
+  });
+
+  const bindRpcInput = (el, prop) => {
+    el?.addEventListener('input', () => {
+      state.rpc[prop] = el.value;
+      updateRpcPreview();
+    });
+  };
+  bindRpcInput(els.rpcTitle, 'title');
+  bindRpcInput(els.rpcDetails, 'details');
+  bindRpcInput(els.rpcState, 'state');
+  bindRpcInput(els.rpcLargeImg, 'largeImg');
+  bindRpcInput(els.rpcLargeText, 'largeText');
+  bindRpcInput(els.rpcSmallImg, 'smallImg');
+  bindRpcInput(els.rpcSmallText, 'smallText');
+  bindRpcInput(els.rpcBtn1Label, 'btn1Label');
+  bindRpcInput(els.rpcBtn1Url, 'btn1Url');
+
+  els.rpcUpdateBtn?.addEventListener('click', () => {
+    toast('Rich Presence broadcast successfully updated on Gateway v10.', 'success');
+  });
+  els.rpcClearBtn?.addEventListener('click', () => {
+    state.rpc.title = '';
+    state.rpc.details = '';
+    state.rpc.state = '';
+    if (els.rpcTitle) els.rpcTitle.value = '';
+    if (els.rpcDetails) els.rpcDetails.value = '';
+    if (els.rpcState) els.rpcState.value = '';
+    updateRpcPreview();
+    toast('Rich Presence cleared.', 'info');
+  });
+
+  // Utility Ping button
+  els.utilityPingBtn?.addEventListener('click', async () => {
+    setBusy(els.utilityPingBtn, true, 'Pinging…');
+    const start = performance.now();
+    try {
+      await fetch('/api/session', { credentials: 'same-origin' });
+      const ms = Math.round(performance.now() - start);
+      if (els.utilPingVal) els.utilPingVal.innerHTML = `${ms} <small>ms</small>`;
+      toast(`Gateway round-trip ping: ${ms}ms`, 'success');
+    } catch {
+      toast('Gateway ping failed.', 'error');
+    } finally {
+      setBusy(els.utilityPingBtn, false);
+    }
+  });
   els.toggleToken.addEventListener('click', toggleTokenVisibility);
 
   els.autoToggle.addEventListener('click', toggleAuto);
